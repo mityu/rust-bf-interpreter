@@ -218,29 +218,31 @@ mod interpreter {
 }
 
 fn main() -> Result<(), String> {
-    let mut interpreter = interpreter::new(String::from(r#"
-++++++++++ [
-    >+++++++
-    >++++++++++
-    >+++++++++++
-    >+++
-    >+++++++++
-    >+
-    <<<<<<-
-]
->++.
->+.
->--..
-+++.
->++.
->---.
-<<.
-+++.
-------.
-<-.
->>+.
->>.
-                                                       "#));
+    let args : Vec<String> = std::env::args().collect();
+    if args.len() != 2 || args[1] == "-h" || args[1] == "--help" {
+        let usage = vec![
+        "Usage: ./bf <argument>",
+        "    argument:",
+        "        <source-file>    Run brainfuck program.",
+        "        -h|--help        Show this help"
+        ];
+        for s in usage.iter() {
+            println!("{}", s);
+        }
+        return Ok(());
+    }
+
+    let sourcefile = &args[1];
+    let source = match std::fs::read_to_string(sourcefile) {
+        Ok(s) => s,
+        Err(msg) => {
+            println!("Error occured while reading a file: {}", sourcefile);
+            println!("{}", msg);
+            std::process::exit(1);
+        }
+    };
+
+    let mut interpreter = interpreter::new(source);
     interpreter.run()?;
     Ok(())
 }
